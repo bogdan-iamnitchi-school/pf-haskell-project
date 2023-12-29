@@ -1,9 +1,9 @@
 module Bencode.Parser where
 
 import Bencode.Value
-import qualified Data.List as L
+import Data.List qualified as L
 import Parsec (Parser, andThen, orElse, pMap, pThen)
-import qualified Parsec as P
+import Parsec qualified as P
 import Result
 
 -- | Parse a bencode value
@@ -34,18 +34,13 @@ int :: Parser Int
 int =
   P.between (P.char 'i') (P.char 'e') P.number
 
-
-
-
 -- | Parse a bencode string
 --
 -- >>> P.runParser string "3:abc"
 -- Success ("abc", "")
 string :: Parser String
-string = 
+string =
   P.with P.number (\n -> P.char ':' `pThen` P.with (P.take n) P.succeed)
-
-
 
 -- | Parse a bencode list
 --
@@ -55,7 +50,7 @@ string =
 -- >>> P.runParser list "l1:a1:be"
 -- Success ([BencodeString "a",BencodeString "b"], "")
 list :: Parser [BencodeValue]
-list = 
+list =
   P.between (P.char 'l') (P.char 'e') (P.many value)
 
 -- | Parse a bencode dict
@@ -63,9 +58,11 @@ list =
 -- >>> P.runParser dict "d1:ai1e1:bi2ee"
 -- Success ([(BencodeString "a", BencodeInt 1),(BencodeString "b",BencodeInt 2)], "")
 dict :: Parser [BencodeKW]
-dict = 
-  P.between (P.char 'd') (P.char 'e') (P.many kw) where
-    kw = P.with string (\s -> P.with value (\v -> P.succeed (s, v)))
+dict = P.between (P.char 'd') (P.char 'e') (P.many kw)
+  where
+    kw = P.with string $
+      \s -> P.with value $
+        \v -> P.succeed (s, v)
 
 -- | Convenience wrapper for `value`
 --

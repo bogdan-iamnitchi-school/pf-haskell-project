@@ -48,10 +48,9 @@ handleGet getOpts = do
     Error err -> putStrLn "Failed to load DB"
     Success dbGood -> do
       let id = getOptId getOpts
-      let result = DB.findFirst (\e -> entryId e == id) dbGood
-      case result of
-        Just entry -> putStrLn $ entrySnippet entry
-        Nothing -> putStrLn "No entry found"
+      case DB.findFirst (\e -> entryId e == id) dbGood of
+        Just entry | let snippet = entrySnippet entry -> putStrLn snippet
+        _ -> putStrLn "No entry found"
   return ()
 
 -- | Handle the search command
